@@ -52,7 +52,7 @@ class Auth {
         $token = [
             'exp' => $time + (60 * self::$minutes), // Tiempo de expiración
             'aud' => self::Aud(), // Identificación única del usuario
-            'data' => $data // Datos del usuario
+            'data' => $data // Datos del usuario (incluye id, nombre y apellido)
         ];
 
         // Codificar el token usando la clave secreta y el algoritmo de encriptación

@@ -59,7 +59,12 @@ class UserController
             return $res->withHeader('Content-type', 'application/json');
         }
 
-        $token = Auth::addToken(['id' => $user->id]);
+        // Incluir id, nombre y apellido del usuario en el token
+        $token = Auth::addToken([
+            'id' => $user->id,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name
+        ]);
 
         $res->getBody()->write(json_encode(['success' => true, 'message' => 'Inicio de sesión correcto', 'token' => $token]));
         return $res->withHeader('Content-type', 'application/json');
