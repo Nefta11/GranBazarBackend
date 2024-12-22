@@ -5,6 +5,7 @@ require 'src/Config/database.php'; // Cargar configuración de Eloquent
 
 use Slim\Factory\AppFactory;
 use DI\Container;
+use App\Middleware\AuthMiddleware;
 
 // Crear el contenedor de dependencias
 $container = new Container();
