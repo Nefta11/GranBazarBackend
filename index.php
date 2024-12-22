@@ -20,6 +20,5 @@ $app->addErrorMiddleware(true, true, true);
 // Cargar rutas
 (require 'src/Rutas/UserRoute.php')($app);
 (require 'src/Rutas/ProductRoute.php')($app);
-(require 'src/Rutas/CategoryRoute.php')($app);
 
 $app->run();

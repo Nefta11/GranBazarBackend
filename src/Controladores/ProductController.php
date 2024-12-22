@@ -5,18 +5,11 @@ namespace App\Controladores;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Modelos\Product;
-use App\Modelos\Category;
+use App\Modelos\Category; // Asegúrate de que esta ruta sea correcta
 
 class ProductController
 {
-    /**
-     * Crear un nuevo producto.
-     * 
-     * @param Request $req
-     * @param Response $res
-     * @param array $args
-     * @return Response
-     */
+
     public function create(Request $req, Response $res, $args)
     {
         $parametros = json_decode($req->getBody()->getContents());
@@ -51,14 +44,6 @@ class ProductController
         }
     }
 
-    /**
-     * Obtener todos los productos.
-     * 
-     * @param Request $req
-     * @param Response $res
-     * @param array $args
-     * @return Response
-     */
     public function getAll(Request $req, Response $res, $args)
     {
         $products = Product::all();
@@ -66,14 +51,6 @@ class ProductController
         return $res->withHeader('Content-type', 'application/json');
     }
 
-    /**
-     * Actualizar un producto.
-     * 
-     * @param Request $req
-     * @param Response $res
-     * @param array $args
-     * @return Response
-     */
     public function update(Request $req, Response $res, $args)
     {
         $parametros = json_decode($req->getBody()->getContents());
