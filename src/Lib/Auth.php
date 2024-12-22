@@ -7,7 +7,7 @@ use Firebase\JWT\Key;
 
 class Auth {
     // Clave secreta para firmar los tokens JWT
-    private static $secret_key = '';
+    private static $secret_key = 'mi_clave_secreta_segura_123!@#'; 
     // Algoritmo de encriptación
     private static $encrypt = ['HS256'];
     // Identificador único del usuario
