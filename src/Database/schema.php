@@ -61,7 +61,7 @@ if (!Capsule::schema()->hasTable('catalogs')) {
     Capsule::schema()->create('catalogs', function (Blueprint $table) {
         $table->increments('id');
         $table->string('name');
-        $table->unsignedBigInteger('category_id');
+        $table->unsignedInteger('category_id');
         $table->boolean('status')->default(true);
         $table->timestamps();
 
@@ -75,7 +75,7 @@ if (!Capsule::schema()->hasTable('products')) {
         $table->string('name');
         $table->text('description');
         $table->decimal('price', 8, 2);
-        $table->unsignedBigInteger('category_id');
+        $table->unsignedInteger('category_id');
         $table->boolean('status')->default(true);
         $table->timestamps();
 
