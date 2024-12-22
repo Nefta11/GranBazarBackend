@@ -55,18 +55,13 @@ if (!Capsule::schema()->hasTable('categories')) {
         $table->string('name');
         $table->timestamps();
     });
-}
 
-if (!Capsule::schema()->hasTable('catalogs')) {
-    Capsule::schema()->create('catalogs', function (Blueprint $table) {
-        $table->increments('id');
-        $table->string('name');
-        $table->unsignedInteger('category_id');
-        $table->boolean('status')->default(true);
-        $table->timestamps();
-
-        $table->foreign('category_id')->references('id')->on('categories');
-    });
+    // Insertar datos de ejemplo en la tabla categories
+    Capsule::table('categories')->insert([
+        ['name' => 'Hombre'],
+        ['name' => 'Mujer'],
+        ['name' => 'Niños']
+    ]);
 }
 
 if (!Capsule::schema()->hasTable('products')) {
@@ -76,6 +71,7 @@ if (!Capsule::schema()->hasTable('products')) {
         $table->text('description');
         $table->decimal('price', 8, 2);
         $table->unsignedInteger('category_id');
+        $table->string('image');
         $table->boolean('status')->default(true);
         $table->timestamps();
 
