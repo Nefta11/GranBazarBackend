@@ -5,7 +5,7 @@ namespace App\Controladores;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Modelos\Product;
-use App\Modelos\Category; // Asegúrate de que esta ruta sea correcta
+use App\Modelos\Category; 
 
 class ProductController
 {

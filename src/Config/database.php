@@ -6,10 +6,10 @@ $capsule = new Capsule;
 
 $capsule->addConnection([
     'driver' => 'mysql',
-    'host' => 'localhost',          // Cambia esto si usas otro host
-    'database' => 'bd_granBazar',      // Nombre de tu base de datos
-    'username' => 'root',        // Tu usuario de MySQL
-    'password' => '1234567',     // Tu contraseña de MySQL
+    'host' => 'localhost',          
+    'database' => 'bd_granBazar',      
+    'username' => 'root',        
+    'password' => '1234567',     
     'charset' => 'utf8mb4',
     'collation' => 'utf8mb4_unicode_ci',
     'prefix' => '',
