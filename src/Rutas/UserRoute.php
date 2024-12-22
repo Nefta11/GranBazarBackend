@@ -1,11 +1,11 @@
 <?php
 
-use App\Controllers\UserController;
+use App\Controladores\UserController;
 use Slim\App;
 
 return function (App $app) {
-    $app->group('/api', function () {
-        $this->post('/register', UserController::class . ':register');
-        $this->post('/auth', UserController::class . ':auth');
+    $app->group('/api', function (\Slim\Routing\RouteCollectorProxy $group) {
+        $group->post('/register', UserController::class . ':register');
+        $group->post('/auth', UserController::class . ':auth');
     });
 };

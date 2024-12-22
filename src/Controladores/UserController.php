@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controladores;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use App\Models\User;
+use App\Modelos\User;
 use Illuminate\Database\Capsule\Manager as Capsule;
 
 class UserController
