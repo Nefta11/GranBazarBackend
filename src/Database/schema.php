@@ -43,7 +43,7 @@ if (!Capsule::schema()->hasTable('users')) {
         $table->string('last_name');
         $table->string('email')->unique();
         $table->string('phone');
-        $table->string('birthday_unix'); // Cambiar el nombre del campo a birthday_unix
+        $table->string('birthday_unix'); 
         $table->string('password');
         $table->timestamps();
     });
@@ -71,7 +71,7 @@ if (!Capsule::schema()->hasTable('products')) {
         $table->text('description');
         $table->decimal('price', 8, 2);
         $table->unsignedInteger('category_id');
-        $table->string('image');
+        $table->text('image');
         $table->boolean('status')->default(true);
         $table->timestamps();
 
