@@ -43,7 +43,7 @@ if (!Capsule::schema()->hasTable('users')) {
         $table->string('last_name');
         $table->string('email')->unique();
         $table->string('phone');
-        $table->string('birthday');
+        $table->string('birthday_unix'); // Cambiar el nombre del campo a birthday_unix
         $table->string('password');
         $table->timestamps();
     });

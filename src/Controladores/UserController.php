@@ -18,6 +18,25 @@ class UserController
             return $res->withHeader('Content-type', 'application/json');
         }
 
+        // Validar formato de email
+        if (!filter_var($parametros->email, FILTER_VALIDATE_EMAIL)) {
+            $res->getBody()->write(json_encode(['success' => false, 'message' => 'Formato de correo no válido.']));
+            return $res->withHeader('Content-type', 'application/json');
+        }
+
+        // Validar número de teléfono
+        if (!preg_match('/^\d{10}$/', $parametros->phone)) {
+            $res->getBody()->write(json_encode(['success' => false, 'message' => 'El número de teléfono debe tener 10 dígitos.']));
+            return $res->withHeader('Content-type', 'application/json');
+        }
+
+        // Validar formato de fecha de nacimiento
+        $fecha = \DateTime::createFromFormat('d/m/Y', $parametros->birthday);
+        if (!$fecha || $fecha->format('d/m/Y') !== $parametros->birthday) {
+            $res->getBody()->write(json_encode(['success' => false, 'message' => 'Formato de fecha de nacimiento no válido DD-MM-YYYY.']));
+            return $res->withHeader('Content-type', 'application/json');
+        }
+
         $user = User::where('email', $parametros->email)->first();
 
         if ($user) {
@@ -31,7 +50,7 @@ class UserController
             $newUser->last_name = $parametros->last_name;
             $newUser->email = $parametros->email;
             $newUser->phone = $parametros->phone;
-            $newUser->birthday = $parametros->birthday;
+            $newUser->birthday_unix = $fecha->getTimestamp(); // Almacenar fecha en formato Unix
             $newUser->password = password_hash($parametros->password, PASSWORD_DEFAULT);
             $newUser->save();
 
@@ -67,6 +86,22 @@ class UserController
         ]);
 
         $res->getBody()->write(json_encode(['success' => true, 'message' => 'Inicio de sesión correcto', 'token' => $token]));
+        return $res->withHeader('Content-type', 'application/json');
+    }
+
+    public function getUser(Request $req, Response $res, $args)
+    {
+        $user = User::find($args['id']);
+
+        if (!$user) {
+            $res->getBody()->write(json_encode(['success' => false, 'message' => 'Usuario no encontrado.']));
+            return $res->withHeader('Content-type', 'application/json');
+        }
+
+        $userData = $user->toArray();
+        $userData['birthday'] = date('d-m-Y', $user->birthday_unix); // Convertir fecha de Unix a formato DD-mm-yyyy
+
+        $res->getBody()->write(json_encode(['success' => true, 'user' => $userData]));
         return $res->withHeader('Content-type', 'application/json');
     }
 }
