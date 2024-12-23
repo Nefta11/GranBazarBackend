@@ -72,6 +72,7 @@ if (!Capsule::schema()->hasTable('products')) {
         $table->decimal('price', 8, 2);
         $table->unsignedInteger('category_id');
         $table->text('image');
+        $table->integer('stock')->default(0);
         $table->boolean('status')->default(true);
         $table->timestamps();
 
