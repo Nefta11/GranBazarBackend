@@ -58,9 +58,9 @@ if (!Capsule::schema()->hasTable('categories')) {
 
     // Insertar datos de ejemplo en la tabla categories
     Capsule::table('categories')->insert([
-        ['name' => 'Hombre'],
-        ['name' => 'Mujer'],
-        ['name' => 'Niños']
+        ['name' => 'Hombres'],
+        ['name' => 'Mujeres'],
+        ['name' => 'Niñ@s']
     ]);
 }
 
