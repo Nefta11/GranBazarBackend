@@ -13,7 +13,7 @@ class User extends Model
         'email',
         'phone',
         'birthday',
-        'birthday_unix', // Agregar esta línea
+        'birthday_unix',
         'password'
     ];
     protected $hidden = [

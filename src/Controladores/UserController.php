@@ -131,7 +131,7 @@ class UserController
             return $res->withHeader('Content-type', 'application/json');
         }
 
-        $parametros = json_decode($body, false); // Cambiar a false para obtener un objeto
+        $parametros = json_decode($body, false); 
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             $res->getBody()->write(json_encode(['success' => false, 'message' => 'JSON no válido.']));

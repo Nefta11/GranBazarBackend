@@ -56,13 +56,19 @@ if (!Capsule::schema()->hasTable('categories')) {
         $table->timestamps();
     });
 
-    // Insertar datos de ejemplo en la tabla categories
+}
     Capsule::table('categories')->insert([
         ['name' => 'Hombres'],
         ['name' => 'Mujeres'],
-        ['name' => 'Niñ@s']
+        ['name' => 'Niñ@s'],
+        ['name' => 'Unisex'],
+        ['name' => 'Accesorios'],
+        ['name' => 'Deportiva'],
+        ['name' => 'Infantil'],
+        ['name' => 'Juvenil']
     ]);
-}
+    
+
 
 if (!Capsule::schema()->hasTable('products')) {
     Capsule::schema()->create('products', function (Blueprint $table) {
