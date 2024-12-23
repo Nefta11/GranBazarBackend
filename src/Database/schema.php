@@ -42,8 +42,8 @@ if (!Capsule::schema()->hasTable('users')) {
         $table->string('first_name');
         $table->string('last_name');
         $table->string('email')->unique();
-        $table->bigInteger('phone',12);
-        $table->date('birthday');
+        $table->string('phone');
+        $table->string('birthday');
         $table->string('password');
         $table->timestamps();
     });
