@@ -147,7 +147,12 @@ class UserController
                 $res->getBody()->write(json_encode(['success' => false, 'message' => 'Google authentication failed']));
                 return $res->withHeader('Content-type', 'application/json');
             }
-            $payload = (object) $ticket->getPayload(); // Convertir a objeto
+            $payload = $ticket->getPayload();
+            if (!is_array($payload)) {
+                $res->getBody()->write(json_encode(['success' => false, 'message' => 'Invalid payload from Google']));
+                return $res->withHeader('Content-type', 'application/json');
+            }
+            $payload = (object) $payload; // Convertir a objeto
 
             if (!$payload || !isset($payload->email)) {
                 $res->getBody()->write(json_encode(['success' => false, 'message' => 'Google authentication failed']));
