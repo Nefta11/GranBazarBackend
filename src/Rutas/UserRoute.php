@@ -8,6 +8,5 @@ return function (App $app) {
     $app->group('/api', function (\Slim\Routing\RouteCollectorProxy $group) {
         $group->post('/register', UserController::class . ':register');
         $group->post('/auth', UserController::class . ':auth');
-        $group->get('/user/{id}', UserController::class . ':getUser'); // Nueva ruta para obtener un usuario
     });
 };

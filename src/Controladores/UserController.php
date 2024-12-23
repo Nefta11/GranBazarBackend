@@ -6,6 +6,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Modelos\User;
 use App\Lib\Auth;
+use Google_Client;
 
 class UserController
 {
@@ -103,5 +104,44 @@ class UserController
 
         $res->getBody()->write(json_encode(['success' => true, 'user' => $userData]));
         return $res->withHeader('Content-type', 'application/json');
+    }
+
+    public function googleAuth(Request $req, Response $res, $args)
+    {
+        $parametros = json_decode($req->getBody()->getContents());
+        $tokenId = $parametros->tokenId;
+
+        $client = new Google_Client(['client_id' => getenv('CLIENT_ID_WEB')]); 
+        try {
+            $ticket = $client->verifyIdToken($tokenId);
+            $payload = $ticket->getPayload();
+
+            if (!$payload || !isset($payload['email'])) {
+                $res->getBody()->write(json_encode(['success' => false, 'message' => 'Google authentication failed']));
+                return $res->withHeader('Content-type', 'application/json');
+            }
+
+            $user = User::where('email', $payload['email'])->first();
+
+            if (!$user) {
+                $user = new User();
+                $user->first_name = $payload['given_name'];
+                $user->last_name = $payload['family_name'];
+                $user->email = $payload['email'];
+                $user->save();
+            }
+
+            $token = Auth::addToken([
+                'id' => $user->id,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name
+            ]);
+
+            $res->getBody()->write(json_encode(['success' => true, 'token' => $token]));
+            return $res->withHeader('Content-type', 'application/json');
+        } catch (\Exception $e) {
+            $res->getBody()->write(json_encode(['success' => false, 'message' => 'Error with Google authentication']));
+            return $res->withHeader('Content-type', 'application/json');
+        }
     }
 }
