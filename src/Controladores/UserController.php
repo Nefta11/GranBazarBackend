@@ -12,10 +12,16 @@ class UserController
 {
     public function register(Request $req, Response $res, $args)
     {
-        $parametros = json_decode($req->getBody()->getContents());
-
-        if (!$parametros) {
+        $body = $req->getBody()->getContents();
+        if (empty($body)) {
             $res->getBody()->write(json_encode(['success' => false, 'message' => 'Datos no válidos.']));
+            return $res->withHeader('Content-type', 'application/json');
+        }
+
+        $parametros = json_decode($body, false); // Cambiar a false para obtener un objeto
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $res->getBody()->write(json_encode(['success' => false, 'message' => 'JSON no válido.']));
             return $res->withHeader('Content-type', 'application/json');
         }
 
@@ -65,7 +71,18 @@ class UserController
 
     public function auth(Request $req, Response $res, $args)
     {
-        $parametros = json_decode($req->getBody()->getContents());
+        $body = $req->getBody()->getContents();
+        if (empty($body)) {
+            $res->getBody()->write(json_encode(['success' => false, 'message' => 'Datos no válidos.']));
+            return $res->withHeader('Content-type', 'application/json');
+        }
+
+        $parametros = json_decode($body, false); // Cambiar a false para obtener un objeto
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $res->getBody()->write(json_encode(['success' => false, 'message' => 'JSON no válido.']));
+            return $res->withHeader('Content-type', 'application/json');
+        }
 
         $user = User::where('email', $parametros->email)->first();
 
@@ -108,26 +125,42 @@ class UserController
 
     public function googleAuth(Request $req, Response $res, $args)
     {
-        $parametros = json_decode($req->getBody()->getContents());
+        $body = $req->getBody()->getContents();
+        if (empty($body)) {
+            $res->getBody()->write(json_encode(['success' => false, 'message' => 'Datos no válidos.']));
+            return $res->withHeader('Content-type', 'application/json');
+        }
+
+        $parametros = json_decode($body, false); // Cambiar a false para obtener un objeto
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $res->getBody()->write(json_encode(['success' => false, 'message' => 'JSON no válido.']));
+            return $res->withHeader('Content-type', 'application/json');
+        }
+
         $tokenId = $parametros->tokenId;
 
         $client = new Google_Client(['client_id' => getenv('CLIENT_ID_WEB')]); 
         try {
             $ticket = $client->verifyIdToken($tokenId);
-            $payload = $ticket->getPayload();
+            if (!$ticket) {
+                $res->getBody()->write(json_encode(['success' => false, 'message' => 'Google authentication failed']));
+                return $res->withHeader('Content-type', 'application/json');
+            }
+            $payload = (object) $ticket->getPayload(); // Convertir a objeto
 
-            if (!$payload || !isset($payload['email'])) {
+            if (!$payload || !isset($payload->email)) {
                 $res->getBody()->write(json_encode(['success' => false, 'message' => 'Google authentication failed']));
                 return $res->withHeader('Content-type', 'application/json');
             }
 
-            $user = User::where('email', $payload['email'])->first();
+            $user = User::where('email', $payload->email)->first();
 
             if (!$user) {
                 $user = new User();
-                $user->first_name = $payload['given_name'];
-                $user->last_name = $payload['family_name'];
-                $user->email = $payload['email'];
+                $user->first_name = $payload->given_name;
+                $user->last_name = $payload->family_name;
+                $user->email = $payload->email;
                 $user->save();
             }
 
