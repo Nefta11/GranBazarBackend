@@ -3,12 +3,15 @@
 use App\Controladores\ProductController;
 use Slim\App;
 use App\Middleware\AuthMiddleware;
+use Slim\Routing\RouteCollectorProxy;
 
-return function (App $app) {
-    $app->group('/api/products', function (\Slim\Routing\RouteCollectorProxy $group) {
-        $group->post('', ProductController::class . ':create')->add(new AuthMiddleware());
-        $group->get('', ProductController::class . ':getAll')->add(new AuthMiddleware());
-        $group->put('/{id}', ProductController::class . ':update')->add(new AuthMiddleware());
-        $group->delete('/{id}', ProductController::class . ':delete')->add(new AuthMiddleware());
-    });
+$authMiddleware = new AuthMiddleware();
+
+return function (App $app) use ($authMiddleware) {
+    $app->group('/api/products', function (RouteCollectorProxy $group) {
+        $group->post('', ProductController::class . ':create');
+        $group->get('', ProductController::class . ':getAll');
+        $group->put('/{id}', ProductController::class . ':update');
+        $group->delete('/{id}', ProductController::class . ':delete');
+    })->add($authMiddleware);
 };
