@@ -17,6 +17,15 @@ $app = AppFactory::create();
 // Configuración de Slim
 $app->addErrorMiddleware(true, true, true);
 
+// Middleware para manejar CORS
+$app->add(function ($request, $handler) {
+    $response = $handler->handle($request);
+    return $response
+        ->withHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+        ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+});
+
 // Cargar rutas
 (require 'src/Rutas/UserRoute.php')($app);
 (require 'src/Rutas/ProductRoute.php')($app);
