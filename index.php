@@ -26,6 +26,11 @@ $app->add(function ($request, $handler) {
         ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
 });
 
+// Manejar solicitudes OPTIONS para CORS
+$app->options('/{routes:.+}', function ($request, $response, $args) {
+    return $response;
+});
+
 // Cargar rutas
 (require 'src/Rutas/UserRoute.php')($app);
 (require 'src/Rutas/ProductRoute.php')($app);
