@@ -140,7 +140,7 @@ class UserController
 
         $tokenId = $parametros->tokenId;
 
-        $client = new Google_Client(['client_id' => getenv('CLIENT_ID_WEB')]); 
+        $client = new Google_Client(['client_id' => getenv('GOOGLE_CLIENT_ID')]); 
         try {
             $ticket = $client->verifyIdToken($tokenId);
             if (!$ticket) {
