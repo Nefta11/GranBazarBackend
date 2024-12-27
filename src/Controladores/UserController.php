@@ -127,62 +127,76 @@ class UserController
         $res->getBody()->write(json_encode(['success' => true, 'user' => $userData]));
         return $res->withHeader('Content-type', 'application/json');
     }
-
     public function googleAuth(Request $req, Response $res, $args)
     {
+        // Obtener el cuerpo de la solicitud
         $body = $req->getBody()->getContents();
 
+        // Verificar si el cuerpo de la solicitud está vacío
         if (empty($body)) {
             return $this->jsonResponse($res, ['success' => false, 'message' => 'Datos no válidos.'], 400);
         }
 
+        // Decodificar el JSON
         $parametros = json_decode($body, false);
         if (json_last_error() !== JSON_ERROR_NONE) {
             return $this->jsonResponse($res, ['success' => false, 'message' => 'JSON no válido.'], 400);
         }
 
+        // Obtener el tokenId
         $tokenId = $parametros->tokenId ?? null;
         if (!$tokenId) {
             return $this->jsonResponse($res, ['success' => false, 'message' => 'El token es requerido.'], 400);
         }
 
-        // Instanciamos el cliente de Google y deshabilitamos la verificación SSL para desarrollo
-        $client = new Google_Client(['client_id' => '631817857538-ps3dn27d32dp5kc106ri0sr347ubp4ls.apps.googleusercontent.com']);
-        $client->setHttpClient(new \GuzzleHttp\Client(['verify' => false]));  // Deshabilitar SSL en desarrollo
+        // Instanciar el cliente de Google y deshabilitar la verificación SSL para desarrollo
+        $client = new Google_Client([
+            'client_id' => '631817857538-ps3dn27d32dp5kc106ri0sr347ubp4ls.apps.googleusercontent.com' // Asegúrate de que el client_id esté correcto
+        ]);
+        $client->setHttpClient(new \GuzzleHttp\Client(['verify' => false]));  // Deshabilitar SSL en desarrollo (solo para entorno de desarrollo)
 
         try {
+            // Verificar el tokenId con Google
             $ticket = $client->verifyIdToken($tokenId);
             if (!$ticket) {
+                error_log("Autenticación fallida: tokenId no válido"); // Registrar en log para depuración
                 return $this->jsonResponse($res, ['success' => false, 'message' => 'Autenticación con Google fallida.'], 401);
             }
 
-            // Aquí $ticket es un array. Trabajamos directamente con sus valores.
+            // Obtener el payload del ticket
             $payload = $ticket['payload'] ?? null;
 
+            // Verificar que el payload es válido y contiene el campo 'email'
             if (!$payload || !is_array($payload) || !isset($payload['email'])) {
+                error_log("Payload inválido: " . json_encode($payload)); // Registrar en log para depuración
                 return $this->jsonResponse($res, ['success' => false, 'message' => 'Payload inválido de Google.'], 400);
             }
 
             // Buscar o crear el usuario
             $user = User::where('email', $payload['email'])->first();
             if (!$user) {
+                // Si no existe, crear un nuevo usuario
                 $user = new User();
-                $user->first_name = $payload['given_name'] ?? 'Usuario';
-                $user->last_name = $payload['family_name'] ?? '';
+                $user->first_name = $payload['given_name'] ?? 'Usuario'; // Nombre por defecto si no existe
+                $user->last_name = $payload['family_name'] ?? ''; // Apellido por defecto si no existe
                 $user->email = $payload['email'];
                 $user->save();
             }
 
-            // Generar token
+            // Generar un token para el usuario
             $token = Auth::addToken([
                 'id' => $user->id,
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
             ]);
 
+            // Devolver respuesta exitosa con el token
             return $this->jsonResponse($res, ['success' => true, 'token' => $token]);
         } catch (\Exception $e) {
-            error_log($e->getMessage()); // Registrar el error para depuración
+            // Registrar el error para depuración
+            error_log("Error en la autenticación con Google: " . $e->getMessage());
+
+            // Devolver error en la respuesta
             return $this->jsonResponse($res, ['success' => false, 'message' => 'Error en la autenticación con Google.'], 500);
         }
     }
