@@ -146,7 +146,7 @@ class UserController
             return $this->jsonResponse($res, ['success' => false, 'message' => 'El token es requerido.'], 400);
         }
 
-        $client = new Google_Client(['client_id' => getenv('GOOGLE_CLIENT_ID')]);
+        $client = new Google_Client(['client_id' => '631817857538-ps3dn27d32dp5kc106ri0sr347ubp4ls.apps.googleusercontent.com']);
 
         try {
             $ticket = $client->verifyIdToken($tokenId);
