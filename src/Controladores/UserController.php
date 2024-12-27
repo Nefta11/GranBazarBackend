@@ -10,6 +10,11 @@ use Google_Client;
 
 class UserController
 {
+    private function jsonResponse(Response $res, array $data, int $status = 200): Response
+    {
+        $res->getBody()->write(json_encode($data));
+        return $res->withHeader('Content-type', 'application/json')->withStatus($status);
+    }
     public function register(Request $req, Response $res, $args)
     {
         $body = $req->getBody()->getContents();
@@ -126,60 +131,57 @@ class UserController
     public function googleAuth(Request $req, Response $res, $args)
     {
         $body = $req->getBody()->getContents();
+
         if (empty($body)) {
-            $res->getBody()->write(json_encode(['success' => false, 'message' => 'Datos no válidos.']));
-            return $res->withHeader('Content-type', 'application/json');
+            return $this->jsonResponse($res, ['success' => false, 'message' => 'Datos no válidos.'], 400);
         }
 
-        $parametros = json_decode($body, false); 
-
+        $parametros = json_decode($body, false);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            $res->getBody()->write(json_encode(['success' => false, 'message' => 'JSON no válido.']));
-            return $res->withHeader('Content-type', 'application/json');
+            return $this->jsonResponse($res, ['success' => false, 'message' => 'JSON no válido.'], 400);
         }
 
-        $tokenId = $parametros->tokenId;
+        $tokenId = $parametros->tokenId ?? null;
+        if (!$tokenId) {
+            return $this->jsonResponse($res, ['success' => false, 'message' => 'El token es requerido.'], 400);
+        }
 
-        $client = new Google_Client(['client_id' => getenv('GOOGLE_CLIENT_ID')]); 
+        $client = new Google_Client(['client_id' => getenv('GOOGLE_CLIENT_ID')]);
+
         try {
             $ticket = $client->verifyIdToken($tokenId);
             if (!$ticket) {
-                $res->getBody()->write(json_encode(['success' => false, 'message' => 'Google authentication failed']));
-                return $res->withHeader('Content-type', 'application/json');
-            }
-            $payload = $ticket->getPayload();
-            if (!is_array($payload)) {
-                $res->getBody()->write(json_encode(['success' => false, 'message' => 'Invalid payload from Google']));
-                return $res->withHeader('Content-type', 'application/json');
-            }
-            $payload = (object) $payload; // Convertir a objeto
-
-            if (!$payload || !isset($payload->email)) {
-                $res->getBody()->write(json_encode(['success' => false, 'message' => 'Google authentication failed']));
-                return $res->withHeader('Content-type', 'application/json');
+                return $this->jsonResponse($res, ['success' => false, 'message' => 'Autenticación con Google fallida.'], 401);
             }
 
-            $user = User::where('email', $payload->email)->first();
+            // Aquí $ticket es un array. Trabajamos directamente con sus valores.
+            $payload = $ticket['payload'] ?? null;
 
+            if (!$payload || !is_array($payload) || !isset($payload['email'])) {
+                return $this->jsonResponse($res, ['success' => false, 'message' => 'Payload inválido de Google.'], 400);
+            }
+
+            // Buscar o crear el usuario
+            $user = User::where('email', $payload['email'])->first();
             if (!$user) {
                 $user = new User();
-                $user->first_name = $payload->given_name;
-                $user->last_name = $payload->family_name;
-                $user->email = $payload->email;
+                $user->first_name = $payload['given_name'] ?? 'Usuario';
+                $user->last_name = $payload['family_name'] ?? '';
+                $user->email = $payload['email'];
                 $user->save();
             }
 
+            // Generar token
             $token = Auth::addToken([
                 'id' => $user->id,
                 'first_name' => $user->first_name,
-                'last_name' => $user->last_name
+                'last_name' => $user->last_name,
             ]);
 
-            $res->getBody()->write(json_encode(['success' => true, 'token' => $token]));
-            return $res->withHeader('Content-type', 'application/json');
+            return $this->jsonResponse($res, ['success' => true, 'token' => $token]);
         } catch (\Exception $e) {
-            $res->getBody()->write(json_encode(['success' => false, 'message' => 'Error with Google authentication']));
-            return $res->withHeader('Content-type', 'application/json');
+            error_log($e->getMessage()); // Registrar el error para depuración
+            return $this->jsonResponse($res, ['success' => false, 'message' => 'Error en la autenticación con Google.'], 500);
         }
     }
 }
