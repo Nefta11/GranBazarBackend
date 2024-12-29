@@ -108,7 +108,15 @@ class UserController
             'last_name' => $user->last_name
         ]);
 
-        $res->getBody()->write(json_encode(['success' => true, 'message' => 'Inicio de sesión correcto', 'token' => $token]));
+        $userData = $user->toArray();
+        $userData['birthday'] = date('d-m-Y', $user->birthday_unix); // Convertir fecha de Unix a formato DD-mm-yyyy
+
+        $res->getBody()->write(json_encode([
+            'success' => true,
+            'message' => 'Inicio de sesión correcto',
+            'token' => $token,
+            'user' => $userData
+        ]));
         return $res->withHeader('Content-type', 'application/json');
     }
 
