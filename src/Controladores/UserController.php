@@ -101,7 +101,6 @@ class UserController
             return $res->withHeader('Content-type', 'application/json');
         }
 
-        // Incluir id, nombre y apellido del usuario en el token
         $token = Auth::addToken([
             'id' => $user->id,
             'first_name' => $user->first_name,
