@@ -108,7 +108,7 @@ class UserController
         ]);
 
         $userData = $user->toArray();
-        $userData['birthday'] = date('d-m-Y', $user->birthday_unix); // Convertir fecha de Unix a formato DD-mm-yyyy
+        $userData['birthday'] = date('d-m-Y', $user->birthday_unix); 
 
         $res->getBody()->write(json_encode([
             'success' => true,
