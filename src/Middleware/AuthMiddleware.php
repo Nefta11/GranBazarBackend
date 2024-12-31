@@ -19,8 +19,13 @@ class AuthMiddleware
     public function __invoke(Request $request, RequestHandler $handler): Response
     {
         // Obtener el encabezado de autorización
-        $authorizationHeader = $request->getHeaderLine('auth-token');
-        $token = $authorizationHeader;
+        $authorizationHeader = $request->getHeaderLine('Authorization');
+        $token = null;
+
+        // Extraer el token del encabezado si está presente
+        if (preg_match('/Bearer\s(\S+)/', $authorizationHeader, $matches)) {
+            $token = $matches[1];
+        }
 
         // Validar el token
         $authenticated = Auth::validateToken($token);
@@ -33,7 +38,7 @@ class AuthMiddleware
                 "response"   => false,
                 "message"    => "Unauthorized"
             ]));
-            return $response->withStatus(401)->withHeader('Content-type', 'application/json');
+            return $response->withStatus(401);
         }
 
         // Si el token es válido, continuar con el manejo de la solicitud

@@ -58,7 +58,7 @@ class UserController
 
         try {
             $newUser = new User();
-            $newUser->first_name = $parametros->first_name;
+            $newUser->name = $parametros->name;
             $newUser->last_name = $parametros->last_name;
             $newUser->email = $parametros->email;
             $newUser->phone = $parametros->phone;
@@ -78,40 +78,43 @@ class UserController
     {
         $body = $req->getBody()->getContents();
         if (empty($body)) {
-            return $this->jsonResponse($res, ['message' => 'Datos no válidos.'], 400);
+            $res->getBody()->write(json_encode(['success' => false, 'message' => 'Datos no válidos.']));
+            return $res->withHeader('Content-type', 'application/json');
         }
 
-        $parametros = json_decode($body, false);
+        $parametros = json_decode($body, false); // Cambiar a false para obtener un objeto
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            return $this->jsonResponse($res, ['message' => 'JSON no válido.'], 400);
+            $res->getBody()->write(json_encode(['success' => false, 'message' => 'JSON no válido.']));
+            return $res->withHeader('Content-type', 'application/json');
         }
 
         $user = User::where('email', $parametros->email)->first();
 
         if (!$user) {
-            return $this->jsonResponse($res, ['message' => 'Usuario no encontrado.'], 404);
+            $res->getBody()->write(json_encode(['success' => false, 'message' => 'Correo incorrecto.']));
+            return $res->withHeader('Content-type', 'application/json');
         }
 
         if (!password_verify($parametros->password, $user->password)) {
-            return $this->jsonResponse($res, ['message' => 'Contraseña incorrecta.'], 400);
+            $res->getBody()->write(json_encode(['success' => false, 'message' => 'Contraseña incorrecta.']));
+            return $res->withHeader('Content-type', 'application/json');
         }
 
+        // Incluir id, nombre y apellido del usuario en el token
         $token = Auth::addToken([
             'id' => $user->id,
-            'first_name' => $user->first_name,
+            'name' => $user->name,
             'last_name' => $user->last_name
         ]);
 
-        $userData = $user->toArray();
-        $userData['password'] = ''; // Eliminar la contraseña de la respuesta
-        $userData['birthday'] = date('d-m-Y', $user->birthday_unix);
-
-        $res = $res->withHeader('auth-token', $token)
-            ->withHeader('Content-type', 'application/json')
-            ->withStatus(200);
-        $res->getBody()->write(json_encode($userData));
-        return $res;
+        $res->getBody()->write(json_encode(['success' => true, 'message' => 'Inicio de sesión correcto', 'user' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'last_name' => $user->last_name,
+            'email' => $user->email
+        ]]));
+        return $res->withHeader('Content-type', 'application/json')->withHeader('auth-token', $token);
     }
 
     public function getUser(Request $req, Response $res, $args)
@@ -168,7 +171,7 @@ class UserController
             $user = User::where('email', $payload['email'])->first();
             if (!$user) {
                 $user = new User();
-                $user->first_name = $payload['given_name'] ?? 'Usuario';
+                $user->name = $payload['given_name'] ?? 'Usuario';
                 $user->last_name = $payload['family_name'] ?? '';
                 $user->email = $payload['email'];
                 $user->save();
@@ -177,11 +180,16 @@ class UserController
             // Generar token
             $token = Auth::addToken([
                 'id' => $user->id,
-                'first_name' => $user->first_name,
+                'name' => $user->name,
                 'last_name' => $user->last_name,
             ]);
 
-            return $this->jsonResponse($res, ['success' => true, 'token' => $token]);
+            return $this->jsonResponse($res, ['success' => true, 'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'last_name' => $user->last_name,
+                'email' => $user->email
+            ]])->withHeader('auth-token', $token);
         } catch (\Exception $e) {
             error_log($e->getMessage()); // Registrar el error para depuración
             return $this->jsonResponse($res, ['success' => false, 'message' => 'Error en la autenticación con Google.'], 500);
