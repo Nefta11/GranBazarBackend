@@ -78,27 +78,23 @@ class UserController
     {
         $body = $req->getBody()->getContents();
         if (empty($body)) {
-            $res->getBody()->write(json_encode(['success' => false, 'message' => 'Datos no válidos.']));
-            return $res->withHeader('Content-type', 'application/json');
+            return $this->jsonResponse($res, ['message' => 'Datos no válidos.'], 400);
         }
 
-        $parametros = json_decode($body, false); // Cambiar a false para obtener un objeto
+        $parametros = json_decode($body, false);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            $res->getBody()->write(json_encode(['success' => false, 'message' => 'JSON no válido.']));
-            return $res->withHeader('Content-type', 'application/json');
+            return $this->jsonResponse($res, ['message' => 'JSON no válido.'], 400);
         }
 
         $user = User::where('email', $parametros->email)->first();
 
         if (!$user) {
-            $res->getBody()->write(json_encode(['success' => false, 'message' => 'Correo incorrecto.']));
-            return $res->withHeader('Content-type', 'application/json');
+            return $this->jsonResponse($res, ['message' => 'Usuario no encontrado.'], 404);
         }
 
         if (!password_verify($parametros->password, $user->password)) {
-            $res->getBody()->write(json_encode(['success' => false, 'message' => 'Contraseña incorrecta.']));
-            return $res->withHeader('Content-type', 'application/json');
+            return $this->jsonResponse($res, ['message' => 'Contraseña incorrecta.'], 400);
         }
 
         $token = Auth::addToken([
@@ -108,15 +104,14 @@ class UserController
         ]);
 
         $userData = $user->toArray();
-        $userData['birthday'] = date('d-m-Y', $user->birthday_unix); 
+        $userData['password'] = ''; // Eliminar la contraseña de la respuesta
+        $userData['birthday'] = date('d-m-Y', $user->birthday_unix);
 
-        $res->getBody()->write(json_encode([
-            'success' => true,
-            'message' => 'Inicio de sesión correcto',
-            'token' => $token,
-            'user' => $userData
-        ]));
-        return $res->withHeader('Content-type', 'application/json');
+        $res = $res->withHeader('auth-token', $token)
+            ->withHeader('Content-type', 'application/json')
+            ->withStatus(200);
+        $res->getBody()->write(json_encode($userData));
+        return $res;
     }
 
     public function getUser(Request $req, Response $res, $args)
