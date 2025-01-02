@@ -19,12 +19,12 @@ class AuthMiddleware
     public function __invoke(Request $request, RequestHandler $handler): Response
     {
         // Obtener el encabezado de autorización
-        $authorizationHeader = $request->getHeaderLine('Authorization');
+        $authorizationHeader = $request->getHeaderLine('auth-token');
         $token = null;
 
         // Extraer el token del encabezado si está presente
-        if (preg_match('/Bearer\s(\S+)/', $authorizationHeader, $matches)) {
-            $token = $matches[1];
+        if (!empty($authorizationHeader)) {
+            $token = $authorizationHeader;
         }
 
         // Validar el token
