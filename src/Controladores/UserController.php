@@ -108,13 +108,15 @@ class UserController
             'last_name' => $user->last_name
         ]);
 
-        $res->getBody()->write(json_encode(['success' => true, 'message' => 'Inicio de sesión correcto', 'user' => [
+        $res->getBody()->write(json_encode([
+            'success' => true,
+            'token' => $token,
+            'message' => 'Inicio de sesión correcto',
             'id' => $user->id,
             'name' => $user->name,
-            'last_name' => $user->last_name,
-            'email' => $user->email
-        ]]));
-        return $res->withHeader('Content-type', 'application/json')->withHeader('auth-token', $token);
+            'email' => $user->email,
+        ]));
+        return $res->withHeader('Content-type', 'application/json');
     }
 
     public function getUser(Request $req, Response $res, $args)
