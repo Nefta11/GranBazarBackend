@@ -23,7 +23,7 @@ $app->add(function ($request, $handler) {
 
     // Configurar encabezados para CORS
     return $response
-        ->withHeader('Access-Control-Allow-Origin', 'http://localhost:3000') // Cambia esto si el front se despliega en otro dominio
+        ->withHeader('Access-Control-Allow-Origin', 'http://localhost:5173') // Cambia esto si el front se despliega en otro dominio
         ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
         ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
         ->withHeader('Access-Control-Allow-Credentials', 'true'); // Agregar para habilitar cookies si es necesario
