@@ -1,43 +1,90 @@
-# Slim Framework 4 Skeleton Application  
+# Gran Bazar Backend
 
-[![Coverage Status](https://coveralls.io/repos/github/slimphp/Slim-Skeleton/badge.svg?branch=master)](https://coveralls.io/github/slimphp/Slim-Skeleton?branch=master)
+Este proyecto es una aplicación backend desarrollada con el framework Slim 4 y PHP-DI para la gestión de un bazar. Proporciona una API RESTful para manejar productos, usuarios y categorías, entre otros recursos.
 
-Use this skeleton application to quickly setup and start working on a new Slim Framework 4 application. This application uses the latest Slim 4 with Slim PSR-7 implementation and PHP-DI container implementation. It also uses the Monolog logger.
+## Requisitos
 
-This skeleton application was built for Composer. This makes setting up a new Slim Framework application quick and easy.
+- PHP 7.4 o superior
+- Composer
+- Servidor MySQL
 
-## Install the Application
+## Instalación
 
-Run this command from the directory in which you want to install your new Slim Framework application. You will require PHP 7.4 or newer.
+1. Clona este repositorio:
+   ```bash
+   git clone <URL_DEL_REPOSITORIO>
+   ```
+
+2. Navega al directorio del proyecto:
+   ```bash
+   cd gran-bazar-backend
+   ```
+
+3. Instala las dependencias con Composer:
+   ```bash
+   composer install
+   ```
+
+4. Configura la base de datos en el archivo `src/Config/database.php`:
+   ```php
+   'host' => 'localhost',
+   'database' => 'bd_granBazar',
+   'username' => 'root',
+   'password' => '1234567',
+   ```
+
+## Crear Tablas en la Base de Datos
+
+Si ya tienes la base de datos creada pero necesitas generar las tablas, puedes ejecutar el siguiente comando:
 
 ```bash
-composer create-project slim/slim-skeleton [my-app-name]
+php src/Database/schema.php
 ```
 
-Replace `[my-app-name]` with the desired directory name for your new application. You'll want to:
+Este comando ejecutará el archivo `schema.php`, que contiene las instrucciones para crear las tablas necesarias en la base de datos configurada.
 
-* Point your virtual host document root to your new application's `public/` directory.
-* Ensure `logs/` is web writable.
+## Uso
 
-To run the application in development, you can run these commands 
+### Servidor de desarrollo
 
+Para iniciar el servidor de desarrollo, ejecuta:
 ```bash
-cd [my-app-name]
-composer start
+php -S localhost:8080 -t .
 ```
+Luego, abre `http://localhost:8080` en tu navegador.
 
-Or you can use `docker-compose` to run the app with `docker`, so you can run these commands:
-```bash
-cd [my-app-name]
-docker-compose up -d
-```
-After that, open `http://localhost:8080` in your browser.
+### Rutas
 
-Run this command in the application directory to run the test suite
+Las rutas de la API se cargan dinámicamente desde la carpeta `src/Rutas`. Cada archivo en esta carpeta define un conjunto de rutas relacionadas con un recurso específico, como productos o usuarios.
 
+### Middleware
+
+El proyecto incluye middleware para manejar CORS y autenticación. Puedes encontrar la lógica de autenticación en `src/Middleware/AuthMiddleware.php`.
+
+## Estructura del Proyecto
+
+- `index.php`: Punto de entrada principal de la aplicación.
+- `src/Config`: Configuración de la base de datos y otros ajustes.
+- `src/Controladores`: Controladores para manejar la lógica de negocio.
+- `src/Modelos`: Modelos Eloquent para interactuar con la base de datos.
+- `src/Rutas`: Definición de rutas de la API.
+- `vendor/`: Dependencias instaladas por Composer.
+
+## Pruebas
+
+Para ejecutar las pruebas, utiliza:
 ```bash
 composer test
 ```
 
-That's it! Now go build something cool.
-# GranBazarBackend
+## Docker
+
+También puedes ejecutar el proyecto con Docker:
+```bash
+docker-compose up -d
+```
+Luego, abre `http://localhost:8080` en tu navegador.
+
+## Contribuciones
+
+Si deseas contribuir a este proyecto, por favor abre un issue o envía un pull request.
