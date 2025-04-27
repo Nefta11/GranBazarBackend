@@ -131,7 +131,7 @@ class UserController
         $userData = $user->toArray();
         $userData['birthday'] = date('d-m-Y', $user->birthday_unix); // Convertir fecha de Unix a formato DD-mm-yyyy
 
-        $res->getBody()->write(json_encode(['success' => true, 'user' => $userData]));
+        $res->getBody()->write(json_encode($userData));
         return $res->withHeader('Content-type', 'application/json');
     }
     public function googleAuth(Request $req, Response $res, $args)
