@@ -12,8 +12,8 @@ class Auth {
     private static $encrypt = ['HS256'];
     // Identificador único del usuario
     private static $aud = null;
-    // Duración del token en minutos (6 meses)
-    private static $minutes = 259200;
+    // Duración del token en minutos (1 hora)
+    private static $minutes = 60;
 
     /**
      * Genera una identificación única para el usuario.
