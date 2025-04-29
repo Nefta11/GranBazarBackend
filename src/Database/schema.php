@@ -80,6 +80,7 @@ if (!Capsule::schema()->hasTable('products')) {
         $table->text('image');
         $table->integer('stock')->default(0);
         $table->boolean('status')->default(true);
+        $table->decimal('rating', 2, 1)->default(0); // Nueva columna para calificación
         $table->timestamps();
 
         $table->foreign('category_id')->references('id')->on('categories');

@@ -19,8 +19,15 @@ class ProductController
             return $res->withHeader('Content-type', 'application/json');
         }
 
-        // Obtener el ID de la categoría a partir del nombre
-        $category = Category::where('name', $parametros->category)->first();
+        // Obtener el ID de la categoría a partir del ID o el nombre
+        if (isset($parametros->category_id)) {
+            $category = Category::find($parametros->category_id);
+        } elseif (isset($parametros->category)) {
+            $category = Category::where('name', $parametros->category)->first();
+        } else {
+            $category = null;
+        }
+
         if (!$category) {
             $res->getBody()->write(json_encode(['success' => false, 'message' => 'Categoría no válida.']));
             return $res->withHeader('Content-type', 'application/json');
@@ -35,12 +42,15 @@ class ProductController
             $product->image = $parametros->image;
             $product->stock = $parametros->stock;
             $product->status = $parametros->status;
+            $product->rating = $parametros->rating ?? 0; // Default rating to 0 if not provided
             $product->save();
 
             $res->getBody()->write(json_encode(['success' => true, 'message' => 'Producto creado exitosamente.']));
             return $res->withHeader('Content-type', 'application/json');
         } catch (\Exception $e) {
-            $res->getBody()->write(json_encode(['success' => false, 'message' => 'Error al crear producto.']));
+            // Agregar un log de depuración para capturar el error
+            error_log('Error al crear producto: ' . $e->getMessage());
+            $res->getBody()->write(json_encode(['success' => false, 'message' => 'Error al crear producto.', 'error' => $e->getMessage()]));
             return $res->withHeader('Content-type', 'application/json');
         }
     }
@@ -48,7 +58,8 @@ class ProductController
     public function getAll(Request $req, Response $res, $args)
     {
         $products = Product::all();
-        $res->getBody()->write(json_encode(['success' => true, 'data' => $products]));
+        // Enviar directamente el JSON con los productos
+        $res->getBody()->write(json_encode($products));
         return $res->withHeader('Content-type', 'application/json');
     }
 
@@ -62,14 +73,18 @@ class ProductController
             return $res->withHeader('Content-type', 'application/json');
         }
 
-        // Obtener el ID de la categoría a partir del nombre si se proporciona
-        if (isset($parametros->category)) {
+        // Obtener el ID de la categoría a partir del ID o el nombre
+        if (isset($parametros->category_id)) {
+            $category = Category::find($parametros->category_id);
+        } elseif (isset($parametros->category)) {
             $category = Category::where('name', $parametros->category)->first();
-            if (!$category) {
-                $res->getBody()->write(json_encode(['success' => false, 'message' => 'Categoría no válida.']));
-                return $res->withHeader('Content-type', 'application/json');
-            }
-            $product->category_id = $category->id;
+        } else {
+            $category = null;
+        }
+
+        if (!$category) {
+            $res->getBody()->write(json_encode(['success' => false, 'message' => 'Categoría no válida.']));
+            return $res->withHeader('Content-type', 'application/json');
         }
 
         try {
@@ -79,6 +94,7 @@ class ProductController
             if (isset($parametros->image)) $product->image = $parametros->image;
             if (isset($parametros->stock)) $product->stock = $parametros->stock;
             if (isset($parametros->status)) $product->status = $parametros->status;
+            if (isset($parametros->rating)) $product->rating = $parametros->rating; // Update rating if provided
             $product->save();
 
             $res->getBody()->write(json_encode(['success' => true, 'message' => 'Producto actualizado exitosamente.']));
